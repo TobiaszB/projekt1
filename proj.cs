@@ -28,6 +28,12 @@ class Program
         return 5;
     }
 
+    public static int losujLiczbeWatkow(int max)
+    {
+        Random rnd = new Random();
+        return rnd.Next(2, max);
+    }
+
     static void Main()
     {
         System.Console.WriteLine("projekt1");
@@ -35,5 +41,9 @@ class Program
         int maxLiczbaWatkow = MaxLiczbaWatkow();
         Console.Write("Maksymalna liczba wątków: ");
         Console.WriteLine(maxLiczbaWatkow);
+
+        int liczbaWatkow = losujLiczbeWatkow(maxLiczbaWatkow);
+        Console.Write("Wylosowana liczba wątków: ");
+        Console.WriteLine(liczbaWatkow);
     }
 }
