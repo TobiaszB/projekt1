@@ -1,5 +1,9 @@
 using System;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
+
 
 class Program
 {
@@ -34,6 +38,40 @@ class Program
         return rnd.Next(2, max);
     }
 
+
+    public static void Server()
+    {
+
+        Int32 port = 13000;
+        IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+        TcpListener server = new TcpListener(localAddr, port);
+        server.Start();
+
+        Byte[] bytes = new Byte[256];
+        String data = null;
+
+        while(true)
+        {
+            Console.Write("Czekam na polaczenie... ");
+
+            TcpClient client = server.AcceptTcpClient();
+            Console.WriteLine("Połączono z klientem!");
+            data = null;
+            NetworkStream stream = client.GetStream();
+
+            int i;
+            while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+            {
+                data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                Console.WriteLine("Otrzymano: {0}", data);
+            }
+
+            client.Close();
+        }
+        //server.Stop();
+    }
+
+
     static void Main()
     {
         System.Console.WriteLine("projekt1");
@@ -45,5 +83,11 @@ class Program
         int liczbaWatkow = losujLiczbeWatkow(maxLiczbaWatkow);
         Console.Write("Wylosowana liczba wątków: ");
         Console.WriteLine(liczbaWatkow);
+
+        Thread newThread = new Thread(Server);
+        newThread.Start();
+
+        Thread.Sleep(5000);
+
     }
 }
