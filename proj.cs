@@ -71,6 +71,22 @@ class Program
         //server.Stop();
     }
 
+    public static void Client(object numer)
+    {
+        string server = "127.0.0.1";
+        Int32 port = 13000;
+        TcpClient client = new TcpClient(server, port);
+        int numerKlienta = Convert.ToInt32(numer);
+
+        string wiadomosc = String.Concat("wiadomosc od klient nr ", numerKlienta);
+        Byte[] data = System.Text.Encoding.ASCII.GetBytes(wiadomosc);
+        NetworkStream stream = client.GetStream();
+        stream.Write(data, 0, data.Length);
+
+        stream.Close();
+        client.Close();
+    }
+
 
     static void Main()
     {
@@ -84,8 +100,16 @@ class Program
         Console.Write("Wylosowana liczba wątków: ");
         Console.WriteLine(liczbaWatkow);
 
-        Thread newThread = new Thread(Server);
-        newThread.Start();
+        Thread watekSerwera = new Thread(Server);
+        watekSerwera.Start();
+
+        Thread.Sleep(1000);
+
+        for (int i = 0; i < liczbaWatkow; i++)
+        {
+            Thread watekKlienta = new Thread(Client);
+            watekKlienta.Start(i);
+        }
 
         Thread.Sleep(5000);
 
