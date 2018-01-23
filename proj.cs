@@ -1,17 +1,39 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
 
-class Program
+namespace WindowsFormsApp1
 {
-    public static int MaxLiczbaWatkow()
+static class Program
+{
+    static String WybierzPlik()
+    {
+        OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+        openFileDialog1.InitialDirectory = "c:\\";
+        openFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+        openFileDialog1.FilterIndex = 2;
+        openFileDialog1.RestoreDirectory = true;
+
+        if (openFileDialog1.ShowDialog() == DialogResult.OK)
+        {
+            return openFileDialog1.FileName;
+        }
+        else return "";
+    }
+
+    public static int MaxLiczbaWatkow(String plik)
     {
         try
         {
-            using (StreamReader sr = new StreamReader("MaxLiczbaWatkow.txt"))
+            using (StreamReader sr = new StreamReader(plik))
             {
                 string line = sr.ReadLine();
                 int maxLiczbaWatkow = int.Parse(line);
@@ -25,8 +47,8 @@ class Program
         }
         catch (Exception e)
         {
-            Console.WriteLine("Problem z odczytem pliku");
-            Console.WriteLine(e.Message);
+            MessageBox.Show("Problem z odczytem pliku");
+            MessageBox.Show(e.Message);
         }
         //wartość domyślna
         return 5;
@@ -38,10 +60,8 @@ class Program
         return rnd.Next(2, max);
     }
 
-
     public static void Server()
     {
-
         Int32 port = 13000;
         IPAddress localAddr = IPAddress.Parse("127.0.0.1");
         TcpListener server = new TcpListener(localAddr, port);
@@ -50,20 +70,19 @@ class Program
         Byte[] bytes = new Byte[256];
         String data = null;
 
-        while(true)
+        while (true)
         {
-            Console.Write("Czekam na polaczenie... ");
-
             TcpClient client = server.AcceptTcpClient();
-            Console.WriteLine("Połączono z klientem!");
+
             data = null;
             NetworkStream stream = client.GetStream();
 
             int i;
-            while((i = stream.Read(bytes, 0, bytes.Length))!=0)
+            while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
             {
                 data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                Console.WriteLine("Otrzymano: {0}", data);
+                String d = String.Concat("Otrzymano ", data);
+                MessageBox.Show(d);
             }
 
             client.Close();
@@ -87,21 +106,25 @@ class Program
         client.Close();
     }
 
-
+    /// <summary>
+    /// The main entry point for the application.
+    /// </summary>
+    [STAThread]
     static void Main()
     {
-        System.Console.WriteLine("projekt1");
+        String plik = WybierzPlik();
 
-        int maxLiczbaWatkow = MaxLiczbaWatkow();
-        Console.Write("Maksymalna liczba wątków: ");
-        Console.WriteLine(maxLiczbaWatkow);
+        int maxLiczbaWatkow = MaxLiczbaWatkow(plik);
+        String wiadomosc = String.Concat("Maksymalna liczba wątków: ", maxLiczbaWatkow);
+        MessageBox.Show(wiadomosc);
 
         int liczbaWatkow = losujLiczbeWatkow(maxLiczbaWatkow);
-        Console.Write("Wylosowana liczba wątków: ");
-        Console.WriteLine(liczbaWatkow);
+        wiadomosc = String.Concat("Wylosowana liczba wątków: ", liczbaWatkow);
 
         Thread watekSerwera = new Thread(Server);
         watekSerwera.Start();
+
+        MessageBox.Show("Zaczynamy test");
 
         Thread.Sleep(1000);
 
@@ -111,7 +134,9 @@ class Program
             watekKlienta.Start(i);
         }
 
-        Thread.Sleep(5000);
+        Thread.Sleep(10000);
 
+        MessageBox.Show("Koniec programu");
     }
+}
 }
